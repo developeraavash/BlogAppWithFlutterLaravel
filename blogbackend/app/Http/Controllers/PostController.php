@@ -13,11 +13,18 @@ class PostController extends Controller
     public function index()
     {
         return response([
-            "posts" => Post::orderBy("created_at", "desc")->with("user:id,name,image")->withCount('comments', 'likes')->get()
+            "posts" => Post::orderBy("created_at", "desc")->with("user:id,name,image")->withCount(' ', 'likes')
+                ->with(
+                    'likes',
+                    function ($like) {
+                        return $like->where('user_id', auth()->user()->id)->select('id', 'user_id', 'post_id')->get();
+                    }
+                )
+                ->get()
         ], 200);
     }
 
-  
+
     /**
      * Store a newly created resource in storage.
      */
@@ -27,9 +34,14 @@ class PostController extends Controller
         $validatedData = $request->validate([
             'body' => 'required|string',
         ]);
+
+        $image = $this->saveImage($request->image, 'posts');
+
+
         $post = Post::create([
             'body' => $validatedData['body'],
-            'user_id' => auth()->user()->id
+            'user_id' => auth()->user()->id,
+            'image' => $image,
         ]);
 
         return response([

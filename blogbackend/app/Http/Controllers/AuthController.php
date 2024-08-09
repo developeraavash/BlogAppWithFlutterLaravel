@@ -98,43 +98,31 @@ class AuthController extends Controller
 
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(User $user)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(User $user)
-    {
-        //
-    }
+ 
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request)
     {
-        //
-    }
+        $validate = $request->validate([
+            'name' => 'required|String',
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
-    {
-        //
+        $image = $this->saveImage($request->image, 'profiles');
+        auth()->user()->update([
+            'name' => $request->name,
+            'image' => $image,
+        ]);
+        return response(
+            [
+                'message' => 'User updated successfully',
+                'user' => auth()->user()
+            ],
+            200
+        );
+
+
+
     }
 }
